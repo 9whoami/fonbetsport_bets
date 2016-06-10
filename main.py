@@ -19,7 +19,7 @@ class Parser:
     site_dump_file = 'web.htm'
     json_file = 'json.txt'
     target_url = 'https://bets.fonbetsport.com/?locale=ru'
-    api_url = 'http://rustraf.com/fonbet.php'
+    api_url = 'http://rustraf.com/fonbet.php?live=no'
 
     events_xpath = './/table[@id="lineTable"]/tbody/tr'
     event_arrow_xpath = ".//table[@id='lineTable']/tbody/tr/td/div[1]"
