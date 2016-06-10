@@ -27,7 +27,7 @@ class Parser:
     def __init__(self):
         self.parser = etree.HTMLParser(encoding='utf-8')
 
-        self.driver = WebDriver(proxy='99.15.102.148:3548', proxy_type='socks5')
+        self.driver = WebDriver() # (proxy='99.15.102.148:3548', proxy_type='socks5')
         self.driver.get(self.target_url)
         self.script_disable()
         self.show_details()
@@ -37,7 +37,7 @@ class Parser:
         self.page = etree.parse(self.site_dump_file, parser=self.parser)
 
     @staticmethod
-    def _get_segment(cnt, tr):
+    def _get_segment(tr):
         td = tr.getchildren()[0]
         div = td.getchildren()[0].getchildren()[1]
         segment_id = tr.attrib['id'][len('segment'):]
@@ -220,7 +220,7 @@ class Parser:
         for cnt, tr in enumerate(trs):
             tr_id = tr.attrib['id']
 
-            if 'eventUEFA' in tr_id:
+            if tr_id.startswith('segmentEvent') or 'eventUEFA' in tr_id:
                 self.result_json['actions'].pop()
                 continue
 
@@ -229,14 +229,8 @@ class Parser:
                     self.send_onclick(event_id)
             event_id = tr_id
 
-            if tr_id.startswith('segmentEvent'):
-                self.result_json['actions'].pop()
-                # self.result_json['actions'].append(self._get_segment_event(tr))
-                # segment_index = len(self.result_json['actions']) - 1
-                continue
-
             if tr_id.startswith('segment'):
-                self.result_json['actions'].append(dict(self._get_segment(cnt, tr)))
+                self.result_json['actions'].append(dict(self._get_segment(tr)))
                 segment_index = len(self.result_json['actions']) -1
             elif tr_id.startswith('event') and not tr_id.endswith('details'):
                 if 'level1' in tr.attrib['class']:
@@ -260,7 +254,6 @@ class Parser:
         try:
             events = self.driver.get_elements_by_xpath(self.events_xpath)
             for event in events:
-                # self.driver.btn_click(event)
                 event_id = self.driver.get_element_info(event, 'id')
                 if event_id:
                     self.send_onclick(event_id)
